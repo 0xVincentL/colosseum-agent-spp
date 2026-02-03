@@ -7,9 +7,9 @@ Goal: build a minimal **Agent Service Provider Platform (SPP)** on Solana:
 - **Demo UI**: invoke a provider and verify receipts
 
 ## MVP (Hackathon)
-- Anchor program: Provider, Service, JobReceipt accounts
-- Router (Node/TS): register, dispatch, create receipt
-- Web: list providers, create job, show receipt + explorer link
+- **On-chain receipt**: write a JobReceipt to Solana via Memo program (verifiable tx)
+- Router (Node): register (in-memory), dispatch (echo provider), create receipt
+- Web: create job, show receipt + Solana explorer link
 
 ## Non-goals (for now)
 - No private keys in frontend

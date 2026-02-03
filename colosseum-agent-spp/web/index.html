@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Agent SPP Demo</title>
+  <style>
+    body { font-family: ui-sans-serif, system-ui; background:#0b0b0f; color:#eee; margin:0; }
+    .wrap { max-width: 980px; margin:0 auto; padding:24px; }
+    .card { background:#141422; border:1px solid #2a2a44; border-radius:12px; padding:14px; margin:12px 0; }
+    button { background:#e01b24; color:white; border:0; border-radius:10px; padding:10px 12px; font-weight:700; cursor:pointer; }
+    input, textarea { width:100%; background:#0f0f1a; color:#eee; border:1px solid #2a2a44; border-radius:10px; padding:10px; box-sizing:border-box; }
+    textarea { min-height: 120px; }
+    .row { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas; font-size: 12px; white-space: pre-wrap; }
+    a { color:#7dd3fc; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Agent SPP on Solana — Demo (MVP)</h1>
+    <div class="card">
+      <div>Router URL</div>
+      <input id="router" value="http://localhost:8789" />
+      <p style="color:#aaa;">Run router locally and paste its public URL when deployed.</p>
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div>
+          <div>Provider ID</div>
+          <input id="providerId" value="xm-demo" />
+        </div>
+        <div>
+          <div>Service</div>
+          <input id="service" value="echo" />
+        </div>
+      </div>
+      <div style="margin-top:10px;">Request JSON</div>
+      <textarea id="request">{"msg":"hello"}</textarea>
+      <div style="margin-top:10px; display:flex; gap:10px;">
+        <button id="btn">Dispatch + Write Receipt</button>
+        <span id="status" style="color:#aaa;"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:700;">Result</div>
+      <div id="out" class="mono"></div>
+    </div>
+  </div>
+
+<script>
+  const el = (id)=>document.getElementById(id);
+  const out = el('out');
+  const status = el('status');
+  el('btn').onclick = async ()=>{
+    out.textContent='';
+    status.textContent='sending...';
+    const base = el('router').value.replace(/\/$/, '');
+    let req;
+    try { req = JSON.parse(el('request').value); } catch(e) { status.textContent='bad json'; return; }
+    const body = { providerId: el('providerId').value, service: el('service').value, request: req };
+    try {
+      const r = await fetch(base + '/api/dispatch', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body)});
+      const j = await r.json();
+      status.textContent = j.ok ? 'ok' : 'error';
+      if (j.solana?.explorer) {
+        j.solana.explorerLink = j.solana.explorer;
+      }
+      out.textContent = JSON.stringify(j, null, 2);
+    } catch (e) {
+      status.textContent='network error';
+      out.textContent=String(e);
+    }
+  };
+</script>
+</body>
+</html>
