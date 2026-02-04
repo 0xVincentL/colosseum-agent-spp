@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "PORT=8789 node server.js",
+    "keygen": "node scripts/keygen.js",
     "test": "echo \"no tests\""
   },
   "keywords": [],

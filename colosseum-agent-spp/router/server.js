@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const { z } = require('zod');
 const crypto = require('crypto');
-const bs58 = require('bs58');
+const bs58mod = require('bs58');
+const bs58 = bs58mod.default || bs58mod;
 const {
   Connection,
   Keypair,
@@ -11,6 +12,7 @@ const {
   TransactionInstruction,
   clusterApiUrl,
   sendAndConfirmTransaction,
+  LAMPORTS_PER_SOL,
 } = require('@solana/web3.js');
 
 // Memo program (no custom program needed)
@@ -103,6 +105,20 @@ app.post('/api/providers', (req, res) => {
   if (!parsed.success) return res.status(400).json({ ok: false, error: parsed.error.issues });
   registry.providers.push(parsed.data);
   res.json({ ok: true, providers: registry.providers });
+});
+
+app.post('/api/airdrop', async (req, res) => {
+  // Devnet only helper: airdrop to router signer
+  try {
+    const connection = getConnection();
+    const payer = getKeypair();
+    const sol = Number(req.body?.sol ?? 1);
+    const sig = await connection.requestAirdrop(payer.publicKey, Math.floor(sol * LAMPORTS_PER_SOL));
+    await connection.confirmTransaction(sig, 'confirmed');
+    res.json({ ok: true, signature: sig, explorer: `https://explorer.solana.com/tx/${sig}?cluster=devnet` });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: String(e.message || e) });
+  }
 });
 
 app.post('/api/dispatch', async (req, res) => {

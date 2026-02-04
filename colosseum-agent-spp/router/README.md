@@ -26,6 +26,7 @@ npm run dev
 ## Endpoints
 - `GET /api/health`
 - `GET /api/providers`
+- `POST /api/airdrop` (devnet helper; may rate-limit)
 - `POST /api/dispatch`
 
 Example dispatch:
